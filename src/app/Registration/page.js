@@ -1,14 +1,9 @@
-import React from 'react';
+import RegistrationPage from "./RegistrationPage";
 
-// Component
-import RegistrationPage from './RegistrationPage';
-
-const Page = () => {
+export default function Page() {
   return (
     <>
       <RegistrationPage />
     </>
   );
-};
-
-export default Page;
+}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // Import useRouter hook
 
 export default function QuestionForm() {
   const [formData, setFormData] = useState({
+    topic : "",
     question: "",
     options: ["", "", "", ""],
     answer: "",
@@ -32,6 +33,7 @@ export default function QuestionForm() {
     e.preventDefault();
 
     const submissionData = new FormData();
+    submissionData.append("topic", formData.topic);
     submissionData.append("question", formData.question);
     submissionData.append("options", JSON.stringify(formData.options));
     submissionData.append("answer", formData.answer);
@@ -51,10 +53,11 @@ export default function QuestionForm() {
         console.log("Server Response:", result);
 
         // Navigate to /test after successful submission
-        router.push("/Registration/Test");
+        // router.push("/Registration/Test");
 
         // Clear form after submission
         setFormData({
+          topic : formData.topic,
           question: "",
           options: ["", "", "", ""],
           answer: "",
@@ -79,6 +82,19 @@ export default function QuestionForm() {
           {/* Question Input */}
           <div>
             <label htmlFor="question" className="block text-lg font-medium text-gray-700">
+              Topic
+            </label>
+            <textarea
+              id="topic"
+              name="topic"
+              value={formData.topic}
+              onChange={handleInputChange}
+              placeholder="Enter your question here..."
+              className="mt-2 w-full h-24 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg resize-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="question" className="block text-lg font-medium text-gray-700">
               Question
             </label>
             <textarea
@@ -90,7 +106,6 @@ export default function QuestionForm() {
               className="mt-2 w-full h-24 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg resize-none"
             />
           </div>
-
           {/* Options Input */}
           <div>
             <label className="block text-lg font-medium text-gray-700">Options</label>

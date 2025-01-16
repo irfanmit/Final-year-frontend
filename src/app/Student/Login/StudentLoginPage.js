@@ -1,39 +1,45 @@
 "use client"; // For Next.js client-side rendering
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function RegistrationPage() {
-  const [name, setName] = useState("");
+export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleRegister = async (e) => {
+  const router = useRouter(); // Initialize the router
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/register", {
+      const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: name,
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to register");
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
-      setSuccessMessage("Registration successful! You can now log in.");
+      const { token } = data;
+
+      // Save token in local storage
+      localStorage.setItem("authToken", token);
+
+      setSuccessMessage("Login successful!");
+
+      // Redirect to home page
+      router.push("/Student/StudentHome");
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -42,32 +48,21 @@ export default function RegistrationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Register</h1>
+        <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Login as student</h1>
         {errorMessage && (
           <p className="text-red-600 text-center font-semibold">{errorMessage}</p>
         )}
         {successMessage && (
           <p className="text-green-600 text-center font-semibold">{successMessage}</p>
         )}
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-semibold">Full Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-200"
-              placeholder="Enter your full name"
-              required
-            />
-          </div>
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-gray-700 font-semibold">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-200"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
               placeholder="Enter your email"
               required
             />
@@ -78,22 +73,22 @@ export default function RegistrationPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-200"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
               placeholder="Enter your password"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Register
+            Login
           </button>
         </form>
         <p className="text-center text-gray-600 mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-purple-700 font-bold">
-            Login
+          Don't have an account?{" "}
+          <a href="/register" className="text-blue-700 font-bold">
+            Register
           </a>
         </p>
       </div>

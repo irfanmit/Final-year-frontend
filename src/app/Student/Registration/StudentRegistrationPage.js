@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-export default function RegistrationPage() {
+export default function TeacherRegistrationPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +24,7 @@ export default function RegistrationPage() {
           username: name,
           email,
           password,
+          designation : "Student"
         }),
       });
 
@@ -40,9 +41,12 @@ export default function RegistrationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex flex-col items-center justify-center">
+      {/* Page Title */}
+      <h1 className="text-4xl font-bold text-white mb-8">Register as Student</h1>
+
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Register</h1>
+        <h2 className="text-2xl font-bold text-blue-700 text-center mb-6">Register</h2>
         {errorMessage && (
           <p className="text-red-600 text-center font-semibold">{errorMessage}</p>
         )}
@@ -92,7 +96,7 @@ export default function RegistrationPage() {
         </form>
         <p className="text-center text-gray-600 mt-4">
           Already have an account?{" "}
-          <a href="/login" className="text-purple-700 font-bold">
+          <a href="/Student/Login" className="text-purple-700 font-bold">
             Login
           </a>
         </p>
