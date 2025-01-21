@@ -17,9 +17,12 @@ export default function StudentLoginPage() {
     setSuccessMessage("");
 
     try {
+      const token = localStorage.getItem("authToken"); // Retrieve token from local storage
+
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
+          Authorization: token ? `Bearer ${token}` : "", // Add token only if it exists
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
@@ -31,10 +34,10 @@ export default function StudentLoginPage() {
       }
 
       const data = await response.json();
-      const { token } = data;
+      const { token: newToken } = data;
 
-      // Save token in local storage
-      localStorage.setItem("authToken", token);
+      // Save new token in local storage
+      localStorage.setItem("authToken", newToken);
 
       setSuccessMessage("Login successful!");
 
@@ -48,7 +51,7 @@ export default function StudentLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Login as student</h1>
+        <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Login as Student</h1>
         {errorMessage && (
           <p className="text-red-600 text-center font-semibold">{errorMessage}</p>
         )}
