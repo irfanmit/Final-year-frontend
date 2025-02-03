@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTestResult } from "../../../../context/TestResultContext";
 
 export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ export default function StudentLoginPage() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const router = useRouter(); // Initialize the router
+  const {setUserData, userData} = useTestResult();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,6 +37,18 @@ export default function StudentLoginPage() {
 
       const data = await response.json();
       const { token: newToken } = data;
+     console.log(data);
+     setUserData({
+      id : data.user.id,
+      email : data.user.email,
+      image : data.user.image,
+      designation : data.user.designation,
+      username : data.user.username,
+      Tests : data.user.Tests
+     })
+     
+     console.log("user data", userData);
+     
 
       // Save new token in local storage
       localStorage.setItem("authToken", newToken);

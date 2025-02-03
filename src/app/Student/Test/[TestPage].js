@@ -14,9 +14,9 @@ export default function TestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const topicId = searchParams.get("topicId");
+  const topicName = searchParams.get("topicName")
 
-
-  const { setTestResult, testResult } = useTestResult();
+  const { setTestResult, testResult, userData } = useTestResult();
 
   const fetchQuestions = async (page = 1) => {
     try {
@@ -75,7 +75,7 @@ export default function TestPage() {
         const response = await fetch("http://localhost:5000/api/correct_answer/checking_answer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ currentTopicId: topicId, answers: finalAnswers }),
+          body: JSON.stringify({ currentTopicId: topicId, answers: finalAnswers, userId : userData.id, topicName }),
         });
 
         if (!response.ok) throw new Error("Failed to submit answers");

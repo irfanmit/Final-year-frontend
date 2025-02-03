@@ -15,8 +15,17 @@ export const TestResultProvider = ({ children }) => {
     totalQuestions: 0,
   });
 
+  const [userData, setUserData] = useState({
+    id :"",
+    email: "",
+    image:"",
+    username: "",
+    designation: "",
+    Tests : []
+  });
+
   return (
-    <TestResultContext.Provider value={{ testResult, setTestResult }}>
+    <TestResultContext.Provider value={{ testResult, setTestResult, userData, setUserData }}>
       {children}
     </TestResultContext.Provider>
   );
