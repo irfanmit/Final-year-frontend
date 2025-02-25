@@ -14,10 +14,11 @@ export default function TestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const topicId = searchParams.get("topicId");
-  const topicName = searchParams.get("topicName")
+  const topicName = searchParams.get("topicName");
 
   const { setTestResult, testResult, userData } = useTestResult();
 
+  // Fetch questions
   const fetchQuestions = async (page = 1) => {
     try {
       const response = await fetch(
@@ -39,6 +40,41 @@ export default function TestPage() {
     }
   };
 
+  // Start object detection and WebSocket communication
+  useEffect(() => {
+    // Send request to start object detection
+    fetch("http://127.0.0.1:8000/video_feed/", { method: "GET" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to start object detection");
+        console.log("Object detection started");
+      })
+      .catch((error) => {
+        console.error("Error starting object detection:", error);
+      });
+
+    // Connect to WebSocket for real-time alerts
+    const socket = new WebSocket("ws://127.0.0.1:8000/ws/video_feed/");
+
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      alert("`Alert:" ); // Show JavaScript alert popup
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    // Cleanup WebSocket connection on component unmount
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  // Fetch questions on component mount
   useEffect(() => {
     fetchQuestions(1);
   }, []);
@@ -75,7 +111,7 @@ export default function TestPage() {
         const response = await fetch("http://localhost:5000/api/correct_answer/checking_answer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ currentTopicId: topicId, answers: finalAnswers, userId : userData.id, topicName }),
+          body: JSON.stringify({ currentTopicId: topicId, answers: finalAnswers, userId: userData.id, topicName }),
         });
 
         if (!response.ok) throw new Error("Failed to submit answers");
@@ -89,10 +125,9 @@ export default function TestPage() {
           score: data.score,
           totalQuestions: data.totalQuestions,
         });
-        
-        router.push("/Student/Test/Result")
-        console.log("test result after inserting in context : ", testResult);
-        
+
+        router.push("/Student/Test/Result");
+        console.log("Test result after inserting in context:", testResult);
       } catch (error) {
         console.error("Error submitting answers:", error);
       }
