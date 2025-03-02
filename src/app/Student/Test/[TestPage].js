@@ -11,10 +11,16 @@ export default function TestPage() {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [alertDetected, setAlertDetected]  = useState(false)
+  // const [chances , setChances] = useState(5);
+  var chances = 4
+
+  // const [chances, setChances] = useState(3); 
   const router = useRouter();
   const searchParams = useSearchParams();
   const topicId = searchParams.get("topicId");
   const topicName = searchParams.get("topicName");
+  const [socketVal, setSocketVal] = useState(null)
 
   const { setTestResult, testResult, userData } = useTestResult();
 
@@ -41,9 +47,24 @@ export default function TestPage() {
   };
 
   // Start object detection and WebSocket communication
-  useEffect(() => {
+ 
     // Send request to start object detection
-    fetch("http://127.0.0.1:8000/video_feed/", { method: "GET" })
+   const socketreq = async () => {
+    --chances;
+    // setChances((prevChances) => {
+    //   const newChances = prevChances - 1;
+    //   // console.log(`Chances remaining: ${newChances}`);
+    //   return newChances;
+    // });
+    console.log(chances)
+    
+    if(chances<1){
+      console.log("closing");
+      router.push("/Student/StudentHome");
+      
+    }
+
+     fetch("http://127.0.0.1:8000/video_feed/", { method: "GET" })
       .then((response) => {
         if (!response.ok) throw new Error("Failed to start object detection");
         console.log("Object detection started");
@@ -52,8 +73,16 @@ export default function TestPage() {
         console.error("Error starting object detection:", error);
       });
 
+      // if(socketVal){
+      //   console.log("returnng");
+      //  return
+        
+      // }
+    }
     // Connect to WebSocket for real-time alerts
-    const socket = new WebSocket("ws://127.0.0.1:8000/ws/video_feed/");
+    useEffect(() =>{ 
+      
+       const socket = new WebSocket("ws://127.0.0.1:8000/ws/video_feed/");
 
     socket.onopen = () => {
       console.log("WebSocket connected");
@@ -61,8 +90,19 @@ export default function TestPage() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      alert("`Alert:" ); // Show JavaScript alert popup
+      console.log(data);
+      
+      console.log("detected");
+      
+      
+      
+      alert(" Unauthorized activity detected {chances} remaining" ); // Show JavaScript alert popup
+      socketreq();
+      // setAlertDetected(!alertDetected)
+      
+      
     };
+    
 
     socket.onclose = () => {
       console.log("WebSocket disconnected");
@@ -72,7 +112,10 @@ export default function TestPage() {
     return () => {
       socket.close();
     };
-  }, []);
+  },[])
+    useEffect(() => {
+      socketreq();
+  }, [alertDetected])
 
   // Fetch questions on component mount
   useEffect(() => {
