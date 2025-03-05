@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTestResult } from "../../../../context/TestResultContext";
+import { useTestResult } from "../../../context/TestResultContext";
+import Navbar from "../../../components/navbar";
+import Spinner from "../../../components/spinner";
 
 export default function StudentHomePage() {
   const [topics, setTopics] = useState([]);
+  const [loadingTopic, setLoadingTopic] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
@@ -17,6 +20,7 @@ export default function StudentHomePage() {
       if (!response.ok) {
         throw new Error("Failed to fetch topics");
       }
+      
       const data = await response.json();
       setTopics(data.data); // Assuming topics are in `data.data`
     } catch (error) {
@@ -33,6 +37,7 @@ export default function StudentHomePage() {
   }, []);
 
   const handleStartTest = (topicId, topicName) => {
+    setLoadingTopic(topicId)
     router.push(`/Student/Test?topicId=${topicId}&topicName=${topicName}`); // Pass the topic ID as a query parameter
   };
 
@@ -45,6 +50,8 @@ export default function StudentHomePage() {
   }
   const firstLetter = userData?.username?.charAt(0)?.toUpperCase() || "";
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gradient-to-r from-green-500 to-blue-500 flex flex-col items-center justify-center p-4">
      
      <button onClick={() => router.push("/Student/Profile")}>
@@ -69,7 +76,8 @@ export default function StudentHomePage() {
                 onClick={() => handleStartTest(topic._id, topic.topicName)}
                 className="bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
               >
-                Start Test
+             {loadingTopic === topic._id ? <Spinner /> : "Start Test"}
+
               </button>
             </div>
           ))}
@@ -78,5 +86,6 @@ export default function StudentHomePage() {
         <p className="text-gray-300 text-lg">No topics available at the moment.</p>
       )}
     </div>
+    </>
   );
 }

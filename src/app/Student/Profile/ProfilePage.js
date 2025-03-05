@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useTestResult } from "../../../../context/TestResultContext";
+import { useTestResult } from "../../../context/TestResultContext";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import Navbar from "../../../components/navbar";
 
 export default function ProfilePage() {
   const { userData, setTestResult , testResult} = useTestResult(); // Import user data from context
@@ -66,7 +67,7 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentTopicId }),
       });
-
+    
       if (!response.ok) throw new Error("Failed to submit answers");
 
       const data = await response.json();
@@ -89,6 +90,8 @@ export default function ProfilePage() {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative">
         {/* Profile Photo Section */}
@@ -139,5 +142,6 @@ export default function ProfilePage() {
         {uploadStatus && <p className="mt-4 text-center text-sm text-gray-600">{uploadStatus}</p>}
       </div>
     </div>
+    </>
   );
 }

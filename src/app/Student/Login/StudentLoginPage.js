@@ -2,18 +2,21 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTestResult } from "../../../../context/TestResultContext";
+import { useTestResult } from "../../../context/TestResultContext";
+import Spinner from "../../../components/spinner";
 
 export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loadingSpinner, setLoadingSpinner] = useState(false);
 
   const router = useRouter(); // Initialize the router
   const {setUserData, userData} = useTestResult();
 
   const handleLogin = async (e) => {
+    setLoadingSpinner(true);
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -24,7 +27,7 @@ export default function StudentLoginPage() {
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
-          Authorization: token ? `Bearer ${token}` : "", // Add token only if it exists
+          Authorization:  token, // Add token only if it exists
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
@@ -63,7 +66,8 @@ export default function StudentLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-r from-green-500 to-purple-600 flex items-center justify-center">
+      
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-blue-700 text-center mb-6">Login as Student</h1>
         {errorMessage && (
@@ -99,7 +103,7 @@ export default function StudentLoginPage() {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Login
+            {loadingSpinner? <Spinner/> : "Login"}
           </button>
         </form>
         <p className="text-center text-gray-600 mt-4">

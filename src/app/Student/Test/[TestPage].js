@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTestResult } from "../../../../context/TestResultContext";
+import { useTestResult } from "../../../context/TestResultContext";
+import Navbar from "../../../components/navbar";
+import Spinner from "../../../components/spinner";
 
 export default function TestPage() {
   const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const[LoadingSpinner, setLoadingSpinner] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -21,6 +24,7 @@ export default function TestPage() {
   const topicId = searchParams.get("topicId");
   const topicName = searchParams.get("topicName");
   const [socketVal, setSocketVal] = useState(null)
+  // const [message, setMessage] = useState()
 
   const { setTestResult, testResult, userData } = useTestResult();
 
@@ -60,6 +64,8 @@ export default function TestPage() {
     
     if(chances<1){
       console.log("closing");
+      // alert("Test was discared due to unauthorized activities performed...redirecting to home page")
+      // setmessage("")
       router.push("/Student/StudentHome");
       
     }
@@ -96,7 +102,7 @@ export default function TestPage() {
       
       
       
-      alert(" Unauthorized activity detected {chances} remaining" ); // Show JavaScript alert popup
+      alert(` ${data.message} ${chances} chances remaining`); // Show JavaScript alert popup
       socketreq();
       // setAlertDetected(!alertDetected)
       
@@ -143,6 +149,7 @@ export default function TestPage() {
   };
 
   const submitTest = async () => {
+    setLoadingSpinner(true);
     if (selectedAnswer !== null && questions.length > 0) {
       const currentQuestion = questions[0];
       const finalAnswers = [
@@ -186,6 +193,8 @@ export default function TestPage() {
   const currentQuestion = questions[0];
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
       <div className="bg-white p-10 rounded-lg shadow-2xl w-full max-w-4xl">
         <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
@@ -254,10 +263,11 @@ export default function TestPage() {
                 : "bg-red-600 text-white hover:bg-red-700"
             }`}
           >
-            Submit Test
+            {LoadingSpinner?<Spinner/>:"Submit Test"}
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }

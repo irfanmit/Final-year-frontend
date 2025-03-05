@@ -1,6 +1,7 @@
 "use client"; // For Next.js client-side rendering
 
 import React, { useState } from "react";
+import Spinner from "../../../components/spinner";
 
 export default function TeacherRegistrationPage() {
   const [name, setName] = useState("");
@@ -8,8 +9,10 @@ export default function TeacherRegistrationPage() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loadingSpinner, setLoadingSpinner] = useState(false);
 
   const handleRegister = async (e) => {
+    setLoadingSpinner(true);
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -91,7 +94,7 @@ export default function TeacherRegistrationPage() {
             type="submit"
             className="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
           >
-            Register
+            {loadingSpinner?<Spinner/>:"Register"}
           </button>
         </form>
         <p className="text-center text-gray-600 mt-4">

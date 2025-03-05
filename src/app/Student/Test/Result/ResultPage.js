@@ -3,11 +3,15 @@
 import React, { useState } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { useTestResult } from "../../../../../context/TestResultContext";
+import { useTestResult } from "../../../../context/TestResultContext";
+import Navbar from "../../../../components/navbar";
+import { useRouter } from "next/navigation";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function ResultPage() {
+  const router = useRouter();
   const { testResult } = useTestResult();
   const [showIncorrectAnswers, setShowIncorrectAnswers] = useState(false);
 
@@ -31,6 +35,8 @@ export default function ResultPage() {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-3xl text-center">
         <h1 className="text-4xl font-bold text-blue-700 mb-6">Test Results</h1>
@@ -103,6 +109,8 @@ export default function ResultPage() {
           </button>
         </div>
       )}
+      <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"  onClick={()=>router.push("/")}>Go Home</button>
     </div>
+    </>
   );
 }

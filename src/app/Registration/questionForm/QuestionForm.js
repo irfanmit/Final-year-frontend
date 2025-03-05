@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter hook
+import Navbar from "../../../components/navbar";
 
 export default function QuestionForm() {
   const [formData, setFormData] = useState({
@@ -73,6 +74,10 @@ export default function QuestionForm() {
   };
 
   return (
+    <>
+    <Navbar/>
+
+    <button  onClick={()=>router.push("/")}>Go Home</button>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
       <div className="bg-white p-10 rounded-lg shadow-2xl w-full max-w-4xl">
         <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
@@ -165,5 +170,6 @@ export default function QuestionForm() {
         </form>
       </div>
     </div>
+    </>
   );
 }

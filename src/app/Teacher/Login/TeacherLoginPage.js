@@ -2,16 +2,19 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Spinner from "../../../components/spinner";
 
 export default function TeacherLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const[loadingSpinner, setLoadingSpinner] = useState(false);
 
   const router = useRouter(); // Initialize the router
 
   const handleLogin = async (e) => {
+    setLoadingSpinner(true);
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -83,7 +86,7 @@ export default function TeacherLoginPage() {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Login
+           {loadingSpinner? <Spinner/> :"Login"}
           </button>
         </form>
         <p className="text-center text-gray-600 mt-4">
