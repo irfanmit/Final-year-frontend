@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Spinner from "../../../components/spinner";
+import Link from 'next/link';
 
 export default function TeacherRegistrationPage() {
   const [name, setName] = useState("");
@@ -100,9 +101,9 @@ export default function TeacherRegistrationPage() {
         </form>
         <p className="text-center text-gray-600 mt-4">
           Already have an account?{" "}
-          <a href="/Student/Login" className="text-purple-700 font-bold">
+          <Link href="/Student/Login" className="text-purple-700 font-bold/">
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
