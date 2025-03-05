@@ -1,30 +1,27 @@
 "use client"; // For Next.js client-side rendering
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTestResult } from "../../../context/TestResultContext";
 import Navbar from "../../../components/navbar";
 import Spinner from "../../../components/spinner";
 
-export default function TestPage() {
+function TestPageContent() {
   const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const[LoadingSpinner, setLoadingSpinner] = useState(false);
+  const [LoadingSpinner, setLoadingSpinner] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
-  const [alertDetected, setAlertDetected]  = useState(false)
-  // const [chances , setChances] = useState(5);
-  var chances = 4
+  const [alertDetected, setAlertDetected] = useState(false);
 
-  // const [chances, setChances] = useState(3); 
+  let chances = 4; // Not using state, since it's reset on re-render
+
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This must be inside a Suspense boundary
   const topicId = searchParams.get("topicId");
   const topicName = searchParams.get("topicName");
-  const [socketVal, setSocketVal] = useState(null)
-  // const [message, setMessage] = useState()
 
   const { setTestResult, testResult, userData } = useTestResult();
 
@@ -37,12 +34,10 @@ export default function TestPage() {
       if (!response.ok) throw new Error("Failed to fetch questions");
 
       const data = await response.json();
-      console.log(data);
-
       setQuestions(data.data);
       setTotalQuestions(data.meta.totalDocuments);
       setCurrentPage(data.meta.currentPage - 1);
-      setSelectedAnswer(null); // Reset selectedAnswer on page change
+      setSelectedAnswer(null);
     } catch (error) {
       console.error("Error fetching questions:", error);
     } finally {
@@ -50,27 +45,17 @@ export default function TestPage() {
     }
   };
 
-  // Start object detection and WebSocket communication
- 
-    // Send request to start object detection
-   const socketreq = async () => {
+  // WebSocket and object detection
+  const socketreq = async () => {
     --chances;
-    // setChances((prevChances) => {
-    //   const newChances = prevChances - 1;
-    //   // console.log(`Chances remaining: ${newChances}`);
-    //   return newChances;
-    // });
-    console.log(chances)
+    console.log(chances);
     
-    if(chances<1){
+    if (chances < 1) {
       console.log("closing");
-      // alert("Test was discared due to unauthorized activities performed...redirecting to home page")
-      // setmessage("")
       router.push("/Student/StudentHome");
-      
     }
 
-     fetch("http://127.0.0.1:8000/video_feed/", { method: "GET" })
+    fetch("http://127.0.0.1:8000/video_feed/", { method: "GET" })
       .then((response) => {
         if (!response.ok) throw new Error("Failed to start object detection");
         console.log("Object detection started");
@@ -78,17 +63,10 @@ export default function TestPage() {
       .catch((error) => {
         console.error("Error starting object detection:", error);
       });
+  };
 
-      // if(socketVal){
-      //   console.log("returnng");
-      //  return
-        
-      // }
-    }
-    // Connect to WebSocket for real-time alerts
-    useEffect(() =>{ 
-      
-       const socket = new WebSocket("ws://127.0.0.1:8000/ws/video_feed/");
+  useEffect(() => {
+    const socket = new WebSocket("ws://127.0.0.1:8000/ws/video_feed/");
 
     socket.onopen = () => {
       console.log("WebSocket connected");
@@ -96,34 +74,23 @@ export default function TestPage() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(data);
-      
-      console.log("detected");
-      
-      
-      
-      alert(` ${data.message} ${chances} chances remaining`); // Show JavaScript alert popup
+      alert(`${data.message} ${chances} chances remaining`);
       socketreq();
-      // setAlertDetected(!alertDetected)
-      
-      
     };
-    
 
     socket.onclose = () => {
       console.log("WebSocket disconnected");
     };
 
-    // Cleanup WebSocket connection on component unmount
     return () => {
       socket.close();
     };
-  },[])
-    useEffect(() => {
-      socketreq();
-  }, [alertDetected])
+  }, []);
 
-  // Fetch questions on component mount
+  useEffect(() => {
+    socketreq();
+  }, [alertDetected]);
+
   useEffect(() => {
     fetchQuestions(1);
   }, []);
@@ -167,7 +134,6 @@ export default function TestPage() {
         if (!response.ok) throw new Error("Failed to submit answers");
 
         const data = await response.json();
-        console.log("Test submission successful:", data);
         setTestResult({
           correctAnswers: data.correctAnswers,
           incorrectAnswers: data.incorrectAnswers,
@@ -177,7 +143,6 @@ export default function TestPage() {
         });
 
         router.push("/Student/Test/Result");
-        console.log("Test result after inserting in context:", testResult);
       } catch (error) {
         console.error("Error submitting answers:", error);
       }
@@ -187,87 +152,67 @@ export default function TestPage() {
   };
 
   if (isLoading) return <div>Loading...</div>;
-
   if (questions.length === 0) return <div>No questions available.</div>;
 
   const currentQuestion = questions[0];
 
   return (
     <>
-    <Navbar/>
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-      <div className="bg-white p-10 rounded-lg shadow-2xl w-full max-w-4xl">
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
-          Question {currentPage + 1} of {totalQuestions}
-        </h2>
-        <div className="space-y-6">
-          {currentQuestion && (
-            <div className="bg-gray-50 p-6 rounded-md shadow-md space-y-4">
-              <h3 className="text-xl font-semibold text-gray-800">
-                {currentQuestion.question}
-              </h3>
-              {currentQuestion.imagePath && (
-                <img
-                  src={`http://localhost:5000/images/${currentQuestion.imagePath}`}
-                  alt="Uploaded visual"
-                  className="w-40 h-40 object-cover rounded-md shadow-md mb-4"
-                />
-              )}
-              <div className="space-y-2">
-                {currentQuestion.options.map((option, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedAnswer(option)}
-                    className={`block w-full text-left px-4 py-2 rounded-md border ${
-                      selectedAnswer === option
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-800"
-                    } hover:bg-blue-100`}
-                  >
-                    {option}
-                  </button>
-                ))}
+      <Navbar />
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="bg-white p-10 rounded-lg shadow-2xl w-full max-w-4xl">
+          <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
+            Question {currentPage + 1} of {totalQuestions}
+          </h2>
+          <div className="space-y-6">
+            {currentQuestion && (
+              <div className="bg-gray-50 p-6 rounded-md shadow-md space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">{currentQuestion.question}</h3>
+                {currentQuestion.imagePath && (
+                  <img
+                    src={`http://localhost:5000/images/${currentQuestion.imagePath}`}
+                    alt="Uploaded visual"
+                    className="w-40 h-40 object-cover rounded-md shadow-md mb-4"
+                  />
+                )}
+                <div className="space-y-2">
+                  {currentQuestion.options.map((option, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedAnswer(option)}
+                      className={`block w-full text-left px-4 py-2 rounded-md border ${
+                        selectedAnswer === option ? "bg-blue-600 text-white" : "bg-white text-gray-800"
+                      } hover:bg-blue-100`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-        <div className="mt-6 flex justify-between items-center">
-          <button
-            onClick={prevPage}
-            disabled={currentPage === 0}
-            className={`px-6 py-2 rounded-md text-lg font-semibold ${
-              currentPage === 0
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
-            Previous
-          </button>
-          <button
-            onClick={nextPage}
-            disabled={selectedAnswer === null || currentPage === totalQuestions - 1}
-            className={`px-6 py-2 rounded-md text-lg font-semibold ${
-              selectedAnswer === null || currentPage === totalQuestions - 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-green-600 text-white hover:bg-green-700"
-            }`}
-          >
-            Next
-          </button>
-          <button
-            onClick={submitTest}
-            disabled={currentPage !== totalQuestions - 1 || selectedAnswer === null}
-            className={`px-6 py-2 rounded-md text-lg font-semibold ${
-              currentPage !== totalQuestions - 1 || selectedAnswer === null
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-red-600 text-white hover:bg-red-700"
-            }`}
-          >
-            {LoadingSpinner?<Spinner/>:"Submit Test"}
-          </button>
+            )}
+          </div>
+          <div className="mt-6 flex justify-between items-center">
+            <button onClick={prevPage} disabled={currentPage === 0} className="px-6 py-2 rounded-md text-lg font-semibold bg-blue-600 text-white">
+              Previous
+            </button>
+            <button onClick={nextPage} disabled={selectedAnswer === null || currentPage === totalQuestions - 1} className="px-6 py-2 rounded-md text-lg font-semibold bg-green-600 text-white">
+              Next
+            </button>
+            <button onClick={submitTest} disabled={currentPage !== totalQuestions - 1 || selectedAnswer === null} className="px-6 py-2 rounded-md text-lg font-semibold bg-red-600 text-white">
+              {LoadingSpinner ? <Spinner /> : "Submit Test"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </>
+  );
+}
+
+// Wrap inside Suspense
+export default function TestPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TestPageContent />
+    </Suspense>
   );
 }
