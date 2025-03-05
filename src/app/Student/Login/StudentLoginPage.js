@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTestResult } from "../../../context/TestResultContext";
 import Spinner from "../../../components/spinner";
+import Link from "next/link";
 
 export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
@@ -108,9 +109,10 @@ export default function StudentLoginPage() {
         </form>
         <p className="text-center text-gray-600 mt-4">
           Don't have an account?{" "}
-          <a href="/register" className="text-blue-700 font-bold">
+          <Link href="/Student/Registration" className="text-blue-700 font-bold">
             Register
-          </a>
+          
+            </Link>
         </p>
       </div>
     </div>
